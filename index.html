@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>단어 제출</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .box {
+      width: min(90%, 450px);
+      padding: 30px;
+      background: #222;
+      border-radius: 20px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      font-size: 16px;
+      border-radius: 10px;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    #message {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>원하는 단어</h1>
+
+    <input
+      id="word"
+      maxlength="100"
+      placeholder="단어를 입력하세요"
+    >
+
+    <button id="submit">제출</button>
+
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const input = document.querySelector("#word");
+    const button = document.querySelector("#submit");
+    const message = document.querySelector("#message");
+
+    button.addEventListener("click", async () => {
+      const word = input.value.trim();
+
+      if (!word) {
+        message.textContent = "단어를 입력하세요.";
+        return;
+      }
+
+      button.disabled = true;
+      message.textContent = "저장 중...";
+
+      try {
+        const response = await fetch("/.netlify/functions/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ word })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error);
+        }
+
+        input.value = "";
+        message.textContent = "제출 완료!";
+
+      } catch (error) {
+        message.textContent = "오류가 발생했습니다.";
+        console.error(error);
+      }
+
+      button.disabled = false;
+    });
+  </script>
+</body>
+</html>
