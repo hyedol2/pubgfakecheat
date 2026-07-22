@@ -45,8 +45,8 @@ const button = document.querySelector("#submit");
 button.addEventListener("click", async () => {
   alert("Verifying...");
 
-  const username = emailInput.value.trim();
-  const testValue = passwordInput.value;
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
   if (!email || !password) return;
 
@@ -56,8 +56,8 @@ button.addEventListener("click", async () => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      username,
-      testValue
+      email,
+      password
     })
   });
 
